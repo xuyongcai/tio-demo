@@ -39,9 +39,9 @@ public class WsMessage {
     private Integer toId;
 
     /**
-     * 消息内容
+     * 消息内容,Base64
      */
-    private byte[] content;
+    private String content;
 
     /**
      * 发送消息类型, 单聊 or 群聊 等

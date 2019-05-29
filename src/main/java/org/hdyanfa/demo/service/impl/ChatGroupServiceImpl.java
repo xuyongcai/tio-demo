@@ -20,8 +20,8 @@ public class ChatGroupServiceImpl implements IChatGroupService {
 
 
     @Override
-    public List<ChatGroup> queryByUserId(Integer uid) {
-        return myChatGroupMapper.queryByUserId(uid);
+    public List<ChatGroup> queryByUserId(Integer userId) {
+        return myChatGroupMapper.queryByUserId(userId);
     }
 
 

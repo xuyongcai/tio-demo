@@ -12,4 +12,4 @@ logging:
     root:  ERROR
     org.springframework:  ERROR
     org.mybatis:  ERROR
-    com.hdyanfa.interact:  DEBUG
+    org.hdyanfa.demo:  DEBUG

@@ -1,6 +1,8 @@
 package org.hdyanfa.demo.tio;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mysql.jdbc.log.LogFactory;
+import org.apache.commons.codec.binary.Base64;
 import org.hdyanfa.demo.common.ChatMsgCode;
 import org.hdyanfa.demo.domain.ChatGroup;
 import org.hdyanfa.demo.dto.ChatMsg;
@@ -39,6 +41,7 @@ import java.util.List;
 public class TioWsMsgHandler implements IWsMsgHandler {
 
     private static Logger log = LoggerFactory.getLogger(TioWsMsgHandler.class);
+
 
     @Autowired
     private IUserService userService;
@@ -130,19 +133,21 @@ public class TioWsMsgHandler implements IWsMsgHandler {
      */
     @Override
     public Object onText(WsRequest wsRequest, String text, ChannelContext channelContext) throws Exception {
+        log.info("ON_Text...");
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             WsSendInfo wsSendInfo = objectMapper.readValue(text, WsSendInfo.class);
 
             // 心跳检测包
-            if (ChatMsgCode.SendStatus.MSG_PING.equals(wsSendInfo.getCode())) {
+            if (ChatMsgCode.SendStatus.MSG_PING.getCode().equals(wsSendInfo.getCode())) {
                 log.info("MSG_PING...");
 
                 WsResponse wsResponse = WsResponse.fromText(text, TioServerConfig.CHARSET);
                 Tio.send(channelContext, wsResponse);
             }
             // 真正的消息
-            else if (ChatMsgCode.SendStatus.MSG_MESSAGE.equals(wsSendInfo.getCode())) {
+            else if (ChatMsgCode.SendStatus.MSG_MESSAGE.getCode().equals(wsSendInfo.getCode())) {
                 log.info("MSG_MESSAGE...");
 
                 WsMessage wsMessage = wsSendInfo.getWsMessage();
@@ -150,13 +155,20 @@ public class TioWsMsgHandler implements IWsMsgHandler {
                 WsResponse wsResponse = WsResponse.fromText(objectMapper.writeValueAsString(wsSendInfo), TioServerConfig.CHARSET);
 
                 // 单聊
-                if (ChatMsgCode.SendType.FRIEND.equals(wsMessage.getSendType())) {
+                if (ChatMsgCode.SendType.FRIEND.getCode().equals(wsMessage.getSendType())) {
+                    log.info("FRIEND...");
+
                     SetWithLock<ChannelContext> channelContextSetWithLock = Tio.getChannelContextsByUserid(channelContext.groupContext, String.valueOf(wsMessage.getToId()));
 
                     // 用户没有登录，存储到离线文件
                     if (channelContextSetWithLock == null || channelContextSetWithLock.size() == 0) {
+                        log.info("存到离线数据...");
+
                         saveFriendMessage(wsMessage, false);
+
+                        log.info("保存数据成功...");
                     } else {
+                        log.info("用户已登录，存到数据...");
                         Tio.sendToUser(channelContext.groupContext, String.valueOf(wsMessage.getToId()), wsResponse);
                         // 入库操作
                         saveFriendMessage(wsMessage, true);
@@ -170,7 +182,7 @@ public class TioWsMsgHandler implements IWsMsgHandler {
                 }
             }
             // 准备就绪，需要发送离线消息
-            else if (ChatMsgCode.SendStatus.MSG_READY.equals(wsSendInfo.getCode())) {
+            else if (ChatMsgCode.SendStatus.MSG_READY.getCode().equals(wsSendInfo.getCode())) {
                 log.info("MSG_READY...");
 
                 // 未读消息
@@ -178,6 +190,9 @@ public class TioWsMsgHandler implements IWsMsgHandler {
             }
         } catch (IOException e) {
             e.printStackTrace();
+
+            log.info("IOException...");
+
         }
         //返回值是要发送给客户端的内容，一般都是返回null
         return null;
@@ -210,7 +225,7 @@ public class TioWsMsgHandler implements IWsMsgHandler {
             wsMessage.setMsgType(msg.getMsgType());
             wsMessage.setToId(msg.getRecId());
             wsMessage.setFromId(msg.getSendId());
-            wsMessage.setContent(msg.getContent());
+            wsMessage.setContent(Base64.encodeBase64String(msg.getContent()));
             wsMessage.setTimestamp(msg.getAddTime());
 
             WsSendInfo wsSendInfo = new WsSendInfo();
@@ -235,7 +250,7 @@ public class TioWsMsgHandler implements IWsMsgHandler {
         chatMsg.setId(1);
         chatMsg.setRecId(wsMessage.getToId());
         chatMsg.setSendId(wsMessage.getFromId());
-        chatMsg.setContent(wsMessage.getContent());
+        chatMsg.setContent(Base64.decodeBase64(wsMessage.getContent()));
         chatMsg.setReadStatus(readStatus);
         chatMsg.setMsgType(wsMessage.getMsgType());
         chatMsg.setSendDeleted(false);
@@ -264,7 +279,7 @@ public class TioWsMsgHandler implements IWsMsgHandler {
         chatGroupMsg.setId(1);
         chatGroupMsg.setCGroupId(wsMessage.getToId());
         chatGroupMsg.setSendId(wsMessage.getFromId());
-        chatGroupMsg.setContent(wsMessage.getContent());
+        chatGroupMsg.setContent(Base64.decodeBase64(wsMessage.getContent()));
         chatGroupMsg.setMsgType(wsMessage.getMsgType());
         chatGroupMsg.setSendDeleted(false);
         chatGroupMsg.setAddTime(LocalDateTime.now());

@@ -13,5 +13,15 @@
 
     ws://127.0.0.1:9326?userId=1
 
+发送消息体格式：
 
+    {"code":2,
+        "wsMessage":{
+            "fromId":1,
+            "toId":3,
+            "content":"bW9uZ29kYiB0ZXN0",
+            "sendType":0,
+            "msgType":1	
+        }
+    }
 

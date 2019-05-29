@@ -1,5 +1,6 @@
 package org.hdyanfa.demo.service.impl;
 
+import org.apache.commons.codec.binary.Base64;
 import org.hdyanfa.demo.common.ChatMsgCode;
 import org.hdyanfa.demo.dto.ChatGroupMsg;
 import org.hdyanfa.demo.dto.WsMessage;
@@ -66,7 +67,7 @@ public class ChatGroupMsgServiceImpl implements IChatGroupMsgService {
             wsMessage.setId(groupMsg.getId());
             wsMessage.setFromId(groupMsg.getSendId());
             wsMessage.setToId(groupMsg.getCGroupId());
-            wsMessage.setContent(groupMsg.getContent());
+            wsMessage.setContent(Base64.encodeBase64String(groupMsg.getContent()));
             wsMessage.setMsgType(groupMsg.getMsgType());
             wsMessage.setTimestamp(groupMsg.getAddTime());
             wsMessage.setSendType(ChatMsgCode.SendType.GROUP.getCode());

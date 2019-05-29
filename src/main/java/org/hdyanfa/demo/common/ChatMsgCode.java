@@ -1,5 +1,8 @@
 package org.hdyanfa.demo.common;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.StringUtils;
+
 /**
  * @author: xiaochai
  * @create: 2019-04-10
@@ -91,6 +94,11 @@ public class ChatMsgCode {
         SendStatus(Integer code) {
             this.code = code;
         }
+    }
+
+    public static void main(String[] args) {
+        byte[] bytes = StringUtils.getBytesUtf8("mongodb test");
+        System.out.println(Base64.encodeBase64String(bytes));
     }
 
 }
