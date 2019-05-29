@@ -11,7 +11,7 @@
  Target Server Version : 50724
  File Encoding         : 65001
 
- Date: 29/05/2019 09:23:14
+ Date: 29/05/2019 09:34:44
 */
 
 SET NAMES utf8mb4;
@@ -47,6 +47,7 @@ CREATE TABLE `user` (
 -- Records of user
 -- ----------------------------
 BEGIN;
+INSERT INTO `user` VALUES (1, 'xiaochai', '123456', '小柴', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `user` VALUES (2, 'zhangsan', '123456', '张三', 1, NULL, '12', 10086, 11111, NULL, NULL, NULL, 1, NULL);
 INSERT INTO `user` VALUES (3, 'lisi', '123456', '李四', 2, NULL, '13', 10010, 12222, NULL, NULL, NULL, 2, NULL);
 COMMIT;
